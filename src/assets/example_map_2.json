@@ -1,0 +1,42 @@
+{
+    "events": [
+        {
+            "pages": [
+                {
+                    "list": [
+                        {
+                            "parameters": [
+                                0,
+                                "example_1"
+                            ]
+                        },
+                        {
+                            "parameters": [
+                                0,
+                                "example_2"
+                            ]
+                        },
+                        {
+                            "parameters": [
+                                0,
+                                "example_4"
+                            ]
+                        },
+                        {
+                            "parameters": [
+                                0,
+                                "example_5"
+                            ]
+                        },
+                        {
+                            "parameters": [
+                                0,
+                                "example_3"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
