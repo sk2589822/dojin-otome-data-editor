@@ -17,4 +17,4 @@ git add -A
 git commit -m 'deploy'
 
 # if you are deploying to https://<USERNAME>.github.io/<REPO>
- git push -f git@github.com:sk2589822/dojin-otome-data-editor.git master:gh-pages
+git push -f https://github.com/sk2589822/dojin-otome-data-editor.git master:gh-pages
