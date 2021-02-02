@@ -1,171 +1,188 @@
 <template>
   <div class="main w-100">
-    <h3 class="text-center">
-      麻煩請先看
-      <router-link to="Instruction">
-        使用教學
-      </router-link>
-    </h3>
-    <div class="upload-container">
-      <DataUpload
-        :files.sync="baseFiles"
-        name="baseFiles"
-        :title="'日文版data'"
-      />
-      <DataUpload
-        :files.sync="referenceFiles"
-        name="referenceFiles"
-        :title="'中文/英文版data'"
-      />
-    </div>
-    <div class="upload-container">
-      <ImageUpload
-        :images.sync="images"
-        name="images"
-        :title="'圖片檔'"
-      />
-    </div>
-    <div class="mt-2">
-      <div>
-        <label
-          class="mt-4"
-        >
-          選擇遊戲：
-        </label>
-        <b-form-select
-          v-model="selectedGame"
-          :options="games"
-          @change="setRegex(regexMap[$event])"
+    <section class="padding-x-20">
+      <h3 class="text-center">
+        麻煩請先看
+        <router-link to="Instruction">
+          使用教學
+        </router-link>
+      </h3>
+      <div class="upload-container">
+        <DataUpload
+          :files.sync="baseFiles"
+          name="baseFiles"
+          :title="'日文版data'"
+        />
+        <DataUpload
+          :files.sync="referenceFiles"
+          name="referenceFiles"
+          :title="'中文/英文版data'"
         />
       </div>
-      <div>
-        <label
-          for="regex-input"
-          class="mt-4"
-        >
-          正規表示式：
-        </label>
-        <b-form-input
-          id="regex-input"
-          v-model="regex"
-          :disabled="!isManualInputRegex"
-          :placeholder="isManualInputRegex ? '輸入正規表示式' : '選擇遊戲以取得對應的正規表示式'"
+      <div class="upload-container">
+        <ImageUpload
+          :images.sync="images"
+          name="images"
+          :title="'圖片檔'"
         />
       </div>
-      <div class="d-flex flex-wrap mt-4">
-        <div class="pr-4 w-50">
+      <div class="mt-2">
+        <div>
           <label
-            for="diffThreshold-input"
+            class="mt-4"
           >
-            閾值(差異度≧閾值的項目會變色)：
+            選擇遊戲：
           </label>
-          <b-form-input
-            id="diffThreshold-input"
-            :value="diffThreshold"
-            placeholder="輸入閾值"
-            @blur="diffThreshold = $event.target.value"
+          <b-form-select
+            v-model="selectedGame"
+            :options="games"
+            @change="setRegex(regexMap[$event])"
           />
         </div>
-        <div class="pl-4 w-50">
+        <div>
           <label
-            for="size-input"
+            for="regex-input"
+            class="mt-4"
           >
-            圖片尺寸：
+            正規表示式：
           </label>
           <b-form-input
-            id="size-input"
-            :value="size"
-            placeholder="輸入圖片大小"
-            @blur="size = $event.target.value"
+            id="regex-input"
+            v-model="regex"
+            :disabled="!isManualInputRegex"
+            :placeholder="isManualInputRegex ? '輸入正規表示式' : '選擇遊戲以取得對應的正規表示式'"
           />
         </div>
-        <p class="mt-4 w-100 text-left text-secondary">
-          ※解析完之後如果有改上方的值，改完之後請隨便點一下其他地方，數值才會更新
-        </p>
+        <div class="d-flex flex-wrap mt-4">
+          <div class="pr-4 w-50">
+            <label
+              for="diffThreshold-input"
+            >
+              閾值(差異度≧閾值的項目會變色)：
+            </label>
+            <b-form-input
+              id="diffThreshold-input"
+              :value="diffThreshold"
+              placeholder="輸入閾值"
+              @blur="onDiffThresholdInputBlur($event)"
+            />
+          </div>
+          <div class="pl-4 w-50">
+            <label
+              for="size-input"
+            >
+              圖片尺寸：
+            </label>
+            <b-form-input
+              id="size-input"
+              :value="size"
+              placeholder="輸入圖片大小"
+              @blur="onSizeInputBlur($event)"
+            />
+          </div>
+          <p class="mt-4 w-100 text-left text-secondary">
+            ※解析完之後如果有改上方的值，改完之後請隨便點一下其他地方，數值才會更新
+          </p>
+        </div>
       </div>
-    </div>
-    <div class="d-flex flex-wrap justify-content-center mt-4 mx-auto w-50">
-      <b-button
-        variant="warning"
-        class="w-75"
-        @click="loadExample"
-      >
-        使用範例檔案解析
-      </b-button>
-      <b-button
-        variant="primary"
-        :class="['w-75 mt-4', { 'disabled': !isReadyToParse }]"
-        @click="isReadyToParse && parse()"
-      >
-        <b-spinner
-          v-show="isParsing"
-          variant="light"
-          label="Spinning"
-        />
-        <span v-show="!isParsing">
-          解析
-        </span>
-      </b-button>
-      <b-button
-        v-if="isParsed"
-        variant="primary"
-        class="w-75 mt-4"
-        @click="download"
-      >
-        <b-spinner
-          v-show="isDownloading"
-          variant="light"
-          label="Spinning"
-        />
-        <span v-show="!isDownloading">
-          產生檔案
-        </span>
-      </b-button>
-    </div>
+      <div class="d-flex flex-wrap justify-content-center mt-4 mx-auto w-50">
+        <b-button
+          variant="warning"
+          class="w-75"
+          @click="loadExample"
+        >
+          使用範例檔案解析
+        </b-button>
+        <b-button
+          variant="primary"
+          :class="['w-75 mt-4', { 'disabled': !isReadyToParse }]"
+          @click="isReadyToParse && parse()"
+        >
+          <b-spinner
+            v-show="isParsing"
+            variant="light"
+            label="Spinning"
+          />
+          <span v-show="!isParsing">
+            解析
+          </span>
+        </b-button>
+        <b-button
+          v-if="isParsed"
+          variant="primary"
+          class="w-75 mt-4"
+          @click="download"
+        >
+          <b-spinner
+            v-show="isDownloading"
+            variant="light"
+            label="Spinning"
+          />
+          <span v-show="!isDownloading">
+            產生檔案
+          </span>
+        </b-button>
+      </div>
+    </section>
+
     <template v-if="isParsed">
-      <p class="text-right mt-5">
-        <b-button-group>
-          <b-button
-            variant="danger"
-            @click="filterEditorRows"
-          >
-            過濾差異度＜閾值的項目
-          </b-button>
-          <b-button
-            variant="success"
-            @click="resetEditorRows"
-          >
-            顯示全部項目
-          </b-button>
-        </b-button-group>
-      </p>
-      <div class="info-list-container mt-4">
-        <table class="info-list">
-          <tr>
-            <th class="width-15">
-              original image name
-            </th>
-            <th class="width-20">
-              filter / select
-            </th>
-            <th class="width-15">
-              new image name
-            </th>
-            <th>original image</th>
-            <th>new image</th>
-            <th class="width-10">
-              image diff (%)
-            </th>
-          </tr>
-          <tr
-            is="EditorRow"
-            v-for="(item, key) in editorRows"
-            :key="key"
-            :original-image-name="key"
-            :new-image-name.sync="eventsProcessor.eventsMap[key].newEvent"
-            :diff.sync="eventsProcessor.eventsMap[key].diff"
-          />
-        </table>
+      <div class="info-list-container text-center mx-auto mt-4">
+        <p class="text-right mt-5">
+          <b-button-group>
+            <b-button
+              variant="danger"
+              @click="filterEditorRows"
+            >
+              過濾差異度＜閾值的項目
+            </b-button>
+            <b-button
+              variant="success"
+              @click="resetEditorRows"
+            >
+              顯示全部項目
+            </b-button>
+          </b-button-group>
+        </p>
+        <q-virtual-scroll
+          type="table"
+          class="info-list"
+          :virtual-scroll-item-size="size"
+          :virtual-scroll-sticky-size-start="48"
+          :items="editorRows"
+        >
+          <template v-slot:before>
+            <template>
+              <thead class="thead-sticky text-center">
+                <tr>
+                  <th class="width-15">
+                    original image name
+                  </th>
+                  <th class="width-20">
+                    filter / select
+                  </th>
+                  <th class="width-15">
+                    new image name
+                  </th>
+                  <th>original image</th>
+                  <th>new image</th>
+                  <th class="width-10">
+                    image diff (%)
+                  </th>
+                </tr>
+              </thead>
+            </template>
+          </template>
+
+          <template v-slot="{ item: row }">
+            <tr
+              is="EditorRow"
+              :key="row.key"
+              :original-image-name="row.key"
+              :new-image-name.sync="eventsProcessor.eventsMap[row.key].newEvent"
+              :diff.sync="eventsProcessor.eventsMap[row.key].diff"
+            />
+          </template>
+        </q-virtual-scroll>
       </div>
     </template>
   </div>
@@ -248,6 +265,8 @@ export default {
       this.imagesMap = this.getImagesMap()
       this.imagesNames = Object.keys(this.imagesMap)
 
+      this.setVuexData()
+
       if (!this.referenceFiles.length) {
         this.referenceFiles = this.baseFiles
       }
@@ -259,6 +278,12 @@ export default {
 
       this.isParsing = false
       this.isParsed = true
+    },
+    setVuexData() {
+      this.$store.commit('setImagesMap', this.imagesMap)
+      this.$store.commit('setImagesNames', this.imagesNames)
+      this.$store.commit('setDiffThreshold', this.diffThreshold)
+      this.$store.commit('setSize', this.size)
     },
     getImagesMap() {
       let map = {}
@@ -276,15 +301,25 @@ export default {
       return map
     },
     filterEditorRows() {
-      this.editorRows = {}
+      this.editorRows = []
       for (const [key, item] of Object.entries(this.eventsProcessor.eventsMap)) {
         if (item.diff >= this.diffThreshold) {
-          this.editorRows[key] = item.newEvent
+          this.editorRows.push({
+            key,
+          })
         }
       }
     },
     resetEditorRows() {
-      this.editorRows = this.eventsProcessor.eventsMap
+      this.editorRows = Object.keys(this.eventsProcessor.eventsMap).map(key => ({ key }))
+    },
+    onDiffThresholdInputBlur(event) {
+      this.diffThreshold = event.target.value
+      this.$store.commit('setDiffThreshold', this.diffThreshold)
+    },
+    onSizeInputBlur(event) {
+      this.size = event.target.value
+      this.$store.commit('setSize', this.size)
     },
     async download() {
       this.isDownloading = true
@@ -307,6 +342,8 @@ export default {
         }
       })
 
+      this.setVuexData()
+
       this.eventsProcessor = new DojinOtomeDataParser([example_1], [example_2])
       this.eventsProcessor.regex = ''
 
@@ -322,7 +359,12 @@ export default {
 
 <style lang="scss">
 .main {
-  padding: 2% 20% 5%;
+  padding: 2% 0 5%;
+}
+
+.padding-x-20 {
+  padding-right: 20%;
+  padding-left: 20%;
 }
 
 .upload-container {
@@ -340,14 +382,11 @@ export default {
 }
 
 .info-list-container {
-  display: flex;
-  justify-content: center;
+  width: 80%;
 }
 
 .info-list {
-  flex: 1;
-  border: 1px solid #000;
-  padding: 0;
+  max-height: 800px;
 
   th,
   td {
@@ -359,5 +398,17 @@ export default {
     height: 175px;
     object-fit: contain;
   }
+}
+
+.thead-sticky > tr > th {
+  position: sticky;
+  opacity: 1;
+  z-index: 1;
+  background: #000;
+  color: #fff;
+}
+
+.thead-sticky tr:last-child > * {
+  top: 0;
 }
 </style>

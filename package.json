@@ -12,12 +12,14 @@
     "@fortawesome/free-brands-svg-icons": "^5.15.2",
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
     "@fortawesome/vue-fontawesome": "^2.0.2",
+    "@quasar/extras": "^1.0.0",
     "bootstrap": "^4.5.3",
     "bootstrap-vue": "^2.21.2",
     "core-js": "^3.6.5",
     "file-saver": "^2.0.5",
     "fuzzysort": "^1.1.4",
     "jszip": "^3.5.0",
+    "quasar": "^1.0.0",
     "resemblejs": "^3.2.5",
     "vue": "^2.6.12",
     "vue-router": "^3.2.0",
@@ -39,7 +41,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^6.2.2",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.0",
     "pre-commit": "^1.2.2",
     "sass-loader": "^8.0.2",
     "stylelint": "^13.8.0",
@@ -48,6 +50,7 @@
     "stylelint-config-standard": "^20.0.0",
     "stylelint-order": "^4.1.0",
     "stylelint-scss": "^3.18.0",
+    "vue-cli-plugin-quasar": "~3.0.1",
     "vue-template-compiler": "^2.6.11"
   }
 }

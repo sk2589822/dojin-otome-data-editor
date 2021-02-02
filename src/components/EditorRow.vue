@@ -1,5 +1,5 @@
 <template>
-  <tr :class="[ 'item', { 'over-threshold': diff >= $parent.diffThreshold }]">
+  <tr :class="[ 'item', { 'over-threshold': diff >= diffThreshold }]">
     <td>
       <span>{{ originalImageName }}</span>
     </td>
@@ -29,14 +29,14 @@
     <td>
       <img
         :src="getImageBlobByKey(originalImageName)"
-        :style="{ width: $parent.size + 'px', height: $parent.size + 'px' }"
+        :style="{ width: size + 'px', height: size + 'px' }"
         @load="getImageDiff"
       >
     </td>
     <td>
       <img
         :src="getImageBlobByKey(selectedImageName)"
-        :style="{ width: $parent.size + 'px', height: $parent.size + 'px' }"
+        :style="{ width: size + 'px', height: size + 'px' }"
         @load="getImageDiff"
       >
     </td>
@@ -47,6 +47,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 import Resemble from 'resemblejs'
 import Fuzzysort from 'fuzzysort'
 
@@ -69,13 +71,19 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'imagesMap',
+      'imagesNames',
+      'diffThreshold',
+      'size',
+    ]),
     filteredImagesNames() {
       let result = []
       if (this.filter) {
-        result = Fuzzysort.go(this.filter, this.$parent.imagesNames).map(item => item.target)
+        result = Fuzzysort.go(this.filter, this.imagesNames).map(item => item.target)
       }
 
-      return result.length ? result : this.$parent.imagesNames
+      return result.length ? result : this.imagesNames
     },
   },
   created() {
@@ -88,8 +96,8 @@ export default {
       this.getImageDiff()
     },
     getImageDiff() {
-      const originalImage = this.$parent.imagesMap[this.originalImageName]
-      const selectedImage = this.$parent.imagesMap[this.selectedImageName]
+      const originalImage = this.imagesMap[this.originalImageName]
+      const selectedImage = this.imagesMap[this.selectedImageName]
 
       if (originalImage && selectedImage) {
         Resemble(originalImage.file).compareTo(selectedImage.file).onComplete(data => {
@@ -101,7 +109,7 @@ export default {
       }
     },
     getImageBlobByKey(key) {
-      return this.$parent.imagesMap[key]?.blob
+      return this.imagesMap[key]?.blob
     },
   },
 }
