@@ -60,6 +60,10 @@ export default {
       type: String,
       default: '',
     },
+    isShowDiff: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -78,6 +82,13 @@ export default {
       return result.length ? result : this.$parent.imagesNames
     },
   },
+  watch: {
+    isShowDiff(bool) {
+      if (bool) {
+        this.getImageDiff()
+      }
+    },
+  },
   created() {
     this.selectedImageName = this.newImageName
   },
@@ -88,6 +99,10 @@ export default {
       this.getImageDiff()
     },
     getImageDiff() {
+      if (!this.isShowDiff) {
+        return
+      }
+
       const originalImage = this.$parent.imagesMap[this.originalImageName]
       const selectedImage = this.$parent.imagesMap[this.selectedImageName]
 
@@ -108,18 +123,6 @@ export default {
 </script>
 
 <style lang="scss">
-.width-10 {
-  width: 10%;
-}
-
-.width-15 {
-  width: 15%;
-}
-
-.width-20 {
-  width: 20%;
-}
-
 .over-threshold {
   background: rgb(255, 141, 141);
 }

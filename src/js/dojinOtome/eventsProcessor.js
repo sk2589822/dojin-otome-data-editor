@@ -126,7 +126,7 @@ export default class {
     for (let i = 0; i < originalEvents.length; i++) {
       eventsMap[originalEvents[i]] = {
         newEvent: newEvents[i],
-        diff: 0,
+        diff: null,
       }
     }
     eventsMap = this.sortObject(eventsMap)

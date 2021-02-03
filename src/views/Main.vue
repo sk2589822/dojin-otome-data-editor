@@ -124,7 +124,7 @@
     </div>
     <template v-if="isParsed">
       <p class="text-right mt-5">
-        <b-button-group>
+        <b-button-group v-if="isShowDiff && isDiffComputed">
           <b-button
             variant="danger"
             @click="filterEditorRows"
@@ -138,22 +138,36 @@
             顯示全部項目
           </b-button>
         </b-button-group>
+        <b-button
+          v-else
+          variant="danger"
+          class="w-15"
+          @click="isShowDiff = true"
+        >
+          <b-spinner
+            v-show="isShowDiff"
+            label="Spinning"
+          />
+          <span v-show="!isShowDiff">
+            計算差異度
+          </span>
+        </b-button>
       </p>
       <div class="info-list-container mt-4">
         <table class="info-list">
           <tr>
-            <th class="width-15">
+            <th class="w-15">
               original image name
             </th>
-            <th class="width-20">
+            <th class="w-20">
               filter / select
             </th>
-            <th class="width-15">
+            <th class="w-15">
               new image name
             </th>
             <th>original image</th>
             <th>new image</th>
-            <th class="width-10">
+            <th class="w-10">
               image diff (%)
             </th>
           </tr>
@@ -164,6 +178,7 @@
             :original-image-name="key"
             :new-image-name.sync="eventsProcessor.eventsMap[key].newEvent"
             :diff.sync="eventsProcessor.eventsMap[key].diff"
+            :is-show-diff="isShowDiff"
           />
         </table>
       </div>
@@ -221,6 +236,7 @@ export default {
       isParsing: false,
       isParsed: false,
       diffThreshold: 10,
+      isShowDiff: false,
       editorRows: [],
       size: 175,
       isDownloading: false,
@@ -233,6 +249,9 @@ export default {
     },
     isManualInputRegex() {
       return this.selectedGame === 'manual'
+    },
+    isDiffComputed() {
+      return Object.values(this.eventsProcessor.eventsMap).every(item => item.diff !== null)
     },
   },
   methods: {
@@ -321,6 +340,18 @@ export default {
 </script>
 
 <style lang="scss">
+.w-10 {
+  width: 10%;
+}
+
+.w-15 {
+  width: 15%;
+}
+
+.w-20 {
+  width: 20%;
+}
+
 .main {
   padding: 2% 20% 5%;
 }
