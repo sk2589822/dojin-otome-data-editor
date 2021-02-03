@@ -278,6 +278,7 @@ export default {
 
       this.isParsing = false
       this.isParsed = true
+      this.isShowDiff = false
     },
     getImagesMap() {
       let map = {}
@@ -334,6 +335,7 @@ export default {
 
       this.isParsing = false
       this.isParsed = true
+      this.isShowDiff = false
     },
   },
 }
