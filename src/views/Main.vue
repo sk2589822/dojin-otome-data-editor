@@ -133,7 +133,7 @@
           </b-button>
           <b-button
             variant="success"
-            @click="resetEditorRows"
+            @click="initEditorRows"
           >
             顯示全部項目
           </b-button>
@@ -255,7 +255,7 @@ export default {
       this.eventsProcessor.regex = this.regex
 
       await this.eventsProcessor.parse()
-      this.resetEditorRows()
+      this.initEditorRows()
 
       this.isParsing = false
       this.isParsed = true
@@ -283,7 +283,7 @@ export default {
         }
       }
     },
-    resetEditorRows() {
+    initEditorRows() {
       this.editorRows = this.eventsProcessor.eventsMap
     },
     async download() {
@@ -311,7 +311,7 @@ export default {
       this.eventsProcessor.regex = ''
 
       await this.eventsProcessor.parse()
-      this.resetEditorRows()
+      this.initEditorRows()
 
       this.isParsing = false
       this.isParsed = true
