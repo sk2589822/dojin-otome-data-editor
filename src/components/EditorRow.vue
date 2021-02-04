@@ -7,11 +7,12 @@
       <input
         v-model="filter"
         type="text"
-        @input="updateImage(filteredImagesNames[0])"
+        @input="autoSelectImage"
       >
       <select
+        v-if="filter"
         :value="selectedImageName"
-        class="d-block mx-auto mt-2"
+        class="d-block mx-auto mt-2 w-100"
         @change="updateImage($event.target.value)"
       >
         <option
@@ -74,12 +75,11 @@ export default {
   },
   computed: {
     filteredImagesNames() {
-      let result = []
       if (this.filter) {
-        result = Fuzzysort.go(this.filter, this.$parent.imagesNames).map(item => item.target)
+        return Fuzzysort.go(this.filter, this.$parent.imagesNames , { limit: 50 }).map(t => t.target)
+      } else {
+        return this.$parent.imagesNames
       }
-
-      return result.length ? result : this.$parent.imagesNames
     },
   },
   watch: {
@@ -117,6 +117,11 @@ export default {
     },
     getImageBlobByKey(key) {
       return this.$parent.imagesMap[key]?.blob
+    },
+    autoSelectImage() {
+      if (this.filteredImagesNames.length === 1) {
+         this.selectedImageName = this.filteredImagesNames[0]
+      }
     },
   },
 }
