@@ -1,5 +1,8 @@
 <template>
-  <tr :class="[ 'item', { 'over-threshold': diff >= $parent.diffThreshold }]">
+  <tr
+    v-show="!this.$parent.diff.threshold.isFilterRows || isShow"
+    :class="[ 'item', { 'over-threshold': diff >= threshold }]"
+  >
     <td>
       <span>{{ originalImageName }}</span>
     </td>
@@ -65,18 +68,24 @@ export default {
       type: Boolean,
       default: false,
     },
+    threshold: {
+      type: Number,
+      default: 10,
+    },
   },
   data() {
     return {
       filter: '',
       selectedImageName: '',
       diff: '',
+      isShow: true,
+      isFirstCompute: true,
     }
   },
   computed: {
     filteredImagesNames() {
-      if (this.filter) {
-        return Fuzzysort.go(this.filter, this.$parent.imagesNames , { limit: 50 }).map(t => t.target)
+      if (this.filter.length > 2) {
+        return Fuzzysort.go(this.filter, this.$parent.imagesNames , { limit: 30 }).map(t => t.target)
       } else {
         return this.$parent.imagesNames
       }
@@ -108,12 +117,27 @@ export default {
 
       if (originalImage && selectedImage) {
         Resemble(originalImage.file).compareTo(selectedImage.file).onComplete(data => {
-          this.diff = data.misMatchPercentage
-          this.$emit('update:diff', data.misMatchPercentage)
+          this.updateDiff(parseFloat(data.misMatchPercentage))
         })
       } else {
-        this.diff = 'N/A'
+        setTimeout(() => { this.updateDiff('N/A') }, 0)
       }
+    },
+    updateDiff(value) {
+      this.diff = value
+      this.$emit('update:diff', value)
+
+      if (this.isFirstCompute) {
+        this.$emit('onDiffComputed')
+        this.isFirstCompute = false
+      }
+    },
+    setIsShow() {
+      console.log(this.diff)
+      console.log(this.threshold)
+      this.isShow =
+        (typeof this.diff === 'number' && this.diff >= this.threshold) ||
+        this.diff === 'N/A'
     },
     getImageBlobByKey(key) {
       return this.$parent.imagesMap[key]?.blob

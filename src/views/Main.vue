@@ -52,21 +52,8 @@
           :placeholder="isManualInputRegex ? '輸入正規表示式' : '選擇遊戲以取得對應的正規表示式'"
         />
       </div>
-      <div class="d-flex flex-wrap mt-4">
-        <div class="pr-4 w-50">
-          <label
-            for="diffThreshold-input"
-          >
-            閾值(差異度≧閾值的項目會變色)：
-          </label>
-          <b-form-input
-            id="diffThreshold-input"
-            :value="diffThreshold"
-            placeholder="輸入閾值"
-            @blur="diffThreshold = $event.target.value"
-          />
-        </div>
-        <div class="pl-4 w-50">
+      <div class="mt-4">
+        <div>
           <label
             for="size-input"
           >
@@ -80,7 +67,7 @@
           />
         </div>
         <p class="mt-4 w-100 text-left text-secondary">
-          ※解析完之後如果有改上方的值，改完之後請隨便點一下其他地方，數值才會更新
+          ※改圖片尺寸後隨便點一下其他地方即會套用
         </p>
       </div>
     </div>
@@ -123,17 +110,35 @@
       </b-button>
     </div>
     <template v-if="isParsed">
-      <p class="text-right mt-5">
-        <b-button-group v-if="isShowDiff && isDiffComputed">
+      <div class="d-flex justify-content-end mt-5">
+        <div class="mr-2 text-right">
+          <label for="diffThreshold-input">
+            閾值：
+          </label>
+          <b-form-input
+            id="diffThreshold-input"
+            v-model="diff.threshold.input"
+            class="d-inline-block w-20"
+            placeholder="輸入閾值"
+          />
+        </div>
+        <b-button
+          variant="primary"
+          class="mr-4"
+          @click="diff.threshold.value = parseInt(diff.threshold.input)"
+        >
+          確定
+        </b-button>
+        <b-button-group v-if="diff.isShow && isDiffComputed">
           <b-button
             variant="danger"
-            @click="filterEditorRows"
+            @click="filterRowsOverThreshold"
           >
-            過濾差異度＜閾值的項目
+            只顯示差異度≧閾值的項目
           </b-button>
           <b-button
             variant="success"
-            @click="initEditorRows"
+            @click="diff.threshold.isFilterRows = false"
           >
             顯示全部項目
           </b-button>
@@ -142,16 +147,22 @@
           v-else
           variant="danger"
           class="w-15"
-          @click="isShowDiff = true"
+          @click="diff.isShow = true"
         >
-          <b-spinner
-            v-show="isShowDiff"
-            label="Spinning"
-          />
-          <span v-show="!isShowDiff">
+          <template v-if="diff.isShow">
+            <b-spinner
+              label="Spinning"
+            />
+            <br>
+            {{ diff.computedCount }} / {{ Object.keys(eventsProcessor.eventsMap).length }}
+          </template>
+          <span v-else>
             計算差異度
           </span>
         </b-button>
+      </div>
+      <p class="mt-4 w-100 text-right text-secondary">
+        ※點「確定」後會立即反應到背景顏色，但要過濾掉差異度≧閾值的項目必須再點一次「只顯示差異度≧閾值的項目」
       </p>
       <div class="info-list-container mt-4">
         <table class="info-list">
@@ -173,12 +184,15 @@
           </tr>
           <tr
             is="EditorRow"
-            v-for="(item, key) in editorRows"
+            v-for="(item, key) in eventsProcessor.eventsMap"
+            ref="rows"
             :key="key"
             :original-image-name="key"
             :new-image-name.sync="eventsProcessor.eventsMap[key].newEvent"
             :diff.sync="eventsProcessor.eventsMap[key].diff"
-            :is-show-diff="isShowDiff"
+            :is-show-diff="diff.isShow"
+            :threshold="diff.threshold.value"
+            @onDiffComputed="diff.computedCount++"
           />
         </table>
       </div>
@@ -235,9 +249,15 @@ export default {
       eventsProcessor: null,
       isParsing: false,
       isParsed: false,
-      diffThreshold: 10,
-      isShowDiff: false,
-      editorRows: [],
+      diff: {
+        isShow: false,
+        computedCount: 0,
+        threshold: {
+          input: 10,
+          value: 10,
+          isFilterRows: false,
+        },
+      },
       size: 175,
       isDownloading: false,
       showExample: false,
@@ -251,7 +271,7 @@ export default {
       return this.selectedGame === 'manual'
     },
     isDiffComputed() {
-      return Object.values(this.eventsProcessor.eventsMap).every(item => item.diff !== null)
+      return this.diff.computedCount === Object.keys(this.eventsProcessor.eventsMap).length
     },
   },
   methods: {
@@ -261,9 +281,6 @@ export default {
       }
     },
     async parse() {
-      this.isParsed = false
-      this.isParsing = true
-
       this.imagesMap = this.getImagesMap()
       this.imagesNames = Object.keys(this.imagesMap)
 
@@ -273,12 +290,19 @@ export default {
       this.eventsProcessor = new DojinOtomeDataParser(this.baseFiles, this.referenceFiles)
       this.eventsProcessor.regex = this.regex
 
+      this.initValueBeforeParse()
       await this.eventsProcessor.parse()
-      this.initEditorRows()
-
+      this.setValueAfterParseed()
+    },
+    initValueBeforeParse() {
+      this.isParsed = false
+      this.isParsing = true
+      this.diff.computedCount = 0
+    },
+    setValueAfterParseed() {
       this.isParsing = false
       this.isParsed = true
-      this.isShowDiff = false
+      this.diff.isShow = false
     },
     getImagesMap() {
       let map = {}
@@ -295,16 +319,9 @@ export default {
       }
       return map
     },
-    filterEditorRows() {
-      this.editorRows = {}
-      for (const [key, item] of Object.entries(this.eventsProcessor.eventsMap)) {
-        if (item.diff >= this.diffThreshold) {
-          this.editorRows[key] = item.newEvent
-        }
-      }
-    },
-    initEditorRows() {
-      this.editorRows = this.eventsProcessor.eventsMap
+    filterRowsOverThreshold() {
+      this.diff.threshold.isFilterRows = true
+      this.$refs.rows.forEach(row => { row.setIsShow() })
     },
     async download() {
       this.isDownloading = true
@@ -312,9 +329,6 @@ export default {
       this.isDownloading = false
     },
     async loadExample() {
-      this.isParsed = false
-      this.isParsing = true
-
       let example_1 = new File([new Blob([JSON.stringify(require('@/assets/example_map_1.json'), null, 2)], {type : 'application/json'})], 'Map1.json')
       let example_2 = new File([new Blob([JSON.stringify(require('@/assets/example_map_2.json'), null, 2)], {type : 'application/json'})], 'Map2.json')
       Array.from({length: 5}, (v, i) => i + 1).forEach(i => {
@@ -330,12 +344,9 @@ export default {
       this.eventsProcessor = new DojinOtomeDataParser([example_1], [example_2])
       this.eventsProcessor.regex = ''
 
+      this.initValueBeforeParse()
       await this.eventsProcessor.parse()
-      this.initEditorRows()
-
-      this.isParsing = false
-      this.isParsed = true
-      this.isShowDiff = false
+      this.setValueAfterParseed()
     },
   },
 }
@@ -343,15 +354,15 @@ export default {
 
 <style lang="scss">
 .w-10 {
-  width: 10%;
+  width: 10% !important;
 }
 
 .w-15 {
-  width: 15%;
+  width: 15% !important;
 }
 
 .w-20 {
-  width: 20%;
+  width: 20% !important;
 }
 
 .main {
