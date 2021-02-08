@@ -35,13 +35,19 @@
         :src="getImageBlobByKey(originalImageName)"
         :style="{ width: $parent.size + 'px', height: $parent.size + 'px' }"
         @load="getImageDiff"
+        @dragstart="onDragStart(originalImageName)"
       >
     </td>
-    <td>
+    <td
+      @drop="onDrop"
+      @dragover.prevent
+    >
       <img
         :src="getImageBlobByKey(selectedImageName)"
         :style="{ width: $parent.size + 'px', height: $parent.size + 'px' }"
         @load="getImageDiff"
+        @dragstart="onDragStart(selectedImageName)"
+        @dragend="onDragend"
       >
     </td>
     <td>
@@ -53,6 +59,7 @@
 <script>
 import Resemble from 'resemblejs'
 import Fuzzysort from 'fuzzysort'
+import { mapState } from 'vuex'
 
 export default {
   props: {
@@ -83,6 +90,10 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      sourceImageName: state => state.drag.sourceImageName,
+      targetImageName: state => state.drag.targetImageName,
+    }),
     filteredImagesNames() {
       if (this.filter.length > 2) {
         return Fuzzysort.go(this.filter, this.$parent.imagesNames , { limit: 30 }).map(t => t.target)
@@ -133,8 +144,6 @@ export default {
       }
     },
     setIsShow() {
-      console.log(this.diff)
-      console.log(this.threshold)
       this.isShow =
         (typeof this.diff === 'number' && this.diff >= this.threshold) ||
         this.diff === 'N/A'
@@ -145,6 +154,23 @@ export default {
     autoSelectImage() {
       if (this.filteredImagesNames.length === 1) {
          this.selectedImageName = this.filteredImagesNames[0]
+      }
+    },
+    onDragStart(imageName) {
+      this.$store.commit('setSourceImageName', imageName)
+    },
+    onDragend() {
+      if (this.targetImageName) {
+        this.updateImage(this.targetImageName)
+        this.$store.commit('clearTargetImageName')
+      }
+    },
+    onDrop() {
+      this.$store.commit('setTargetImageName', this.selectedImageName)
+
+      if (this.sourceImageName) {
+        this.updateImage(this.sourceImageName)
+        this.$store.commit('clearSourceImageName')
       }
     },
   },
