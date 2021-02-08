@@ -162,7 +162,7 @@
         </b-button>
       </div>
       <p class="mt-4 w-100 text-right text-secondary">
-        ※點「確定」後會立即反應到背景顏色，但要過濾掉差異度≧閾值的項目必須再點一次「只顯示差異度≧閾值的項目」
+        ※點「確定」後會立即反應到背景顏色。若要過濾掉差異度≧閾值的項目需再點一次「只顯示差異度≧閾值的項目」
       </p>
       <div class="info-list-container mt-4">
         <table class="info-list">

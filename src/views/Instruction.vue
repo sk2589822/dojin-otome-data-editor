@@ -19,7 +19,7 @@
         あまえんぼ (夏日狂想曲：鄉間的難忘回憶)
       </a>
       <br>
-      那就可以用這個工具把遊戲的圖片換成無碼的。
+      那就可以用這個工具把遊戲的圖片換成英文版<span class="transparent">無碼</span>的。
     </p>
     <h1 class="mt-4">
       事先準備
@@ -109,6 +109,15 @@
   li {
     list-style-type: decimal;
     list-style-position: outside;
+  }
+}
+
+.transparent {
+  background: #000;
+  color: #000;
+
+  &:hover {
+    color: #fff;
   }
 }
 </style>
