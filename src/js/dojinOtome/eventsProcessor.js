@@ -29,19 +29,19 @@ export default class {
 
   async parse() {
     await Promise.all([
-      (async () => { this.original.eventsSet = await this.getEventsSet(this.original.files) })(),
+      (async () => { this.original.eventsSet = await this.getEventsSet(this.original.files, true) })(),
       (async () => { this.new.eventsSet = await this.getEventsSet(this.new.files) })(),
     ])
 
     this._eventsMap = this.getEventsMap()
   }
 
-  async getEventsSet(files) {
-    const commonEventsSet = await this.getCommonEventsSet(this.getCommonEventsFile(files))
+  async getEventsSet(files, isOriginal = false) {
+    const commonEventsSet = await this.getCommonEventsSet(this.getCommonEventsFile(files), isOriginal)
 
     let eventsSet = commonEventsSet
     for (const file of this.getMapEventsFile(files)) {
-      const mapEventsSet = await this.getMapEvents(file)
+      const mapEventsSet = await this.getMapEvents(file, isOriginal)
       eventsSet = new Set([...eventsSet, ...mapEventsSet])
     }
 
@@ -54,21 +54,23 @@ export default class {
     })
   }
 
-  async getCommonEventsSet(file) {
+  async getCommonEventsSet(file, isOriginal) {
     let eventsSet = new Set()
 
     if (file) {
       let json = {}
       await this.readFile(file).then(result => {
-        this.original.filesData.commonEvents = {
-          name: file.name,
-          data: result,
+        if (isOriginal) {
+          this.original.filesData.commonEvents = {
+            name: file.name,
+            data: result,
+          }
         }
         json = JSON.parse(result)
       })
 
       json.forEach(obj => {
-        if (obj != undefined && obj.list) {
+        if (obj?.list) {
           obj.list.forEach(item => {
             if (item.parameters.length && this.isImageName(item.parameters[1])) {
               eventsSet.add(item.parameters[1])
@@ -86,16 +88,18 @@ export default class {
     })
   }
 
-  async getMapEvents(file) {
+  async getMapEvents(file, isOriginal) {
     let eventsSet = new Set()
 
     if (file) {
       let json = {}
       await this.readFile(file).then(result => {
-        this.original.filesData.map.push({
-          name: file.name,
-          data: result,
-        })
+        if (isOriginal) {
+          this.original.filesData.map.push({
+            name: file.name,
+            data: result,
+          })
+        }
         json = JSON.parse(result)
       })
 
@@ -163,7 +167,7 @@ export default class {
   getReplacedCommonEvents() {
     let json = JSON.parse(this.original.filesData.commonEvents.data)
     json.forEach(obj => {
-      if (obj != undefined && obj.list) {
+      if (obj?.list) {
         obj.list.forEach(item => {
           if (item.parameters.length && this.isImageName(item.parameters[1])) {
             item.parameters[1] = this._eventsMap[item.parameters[1]].newEvent
