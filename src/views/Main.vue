@@ -243,7 +243,7 @@ export default {
       regex: '',
       regexMap: {
         succumate: /_0\d+/,
-        summerMemories: /(?<!E結衣2_表情H)_0\d+|フェラカットイン\(美雪\)_\d|Blow cut-in \(Miyuki\)_\d/,
+        summerMemories: /(?<!E結衣2_表情H)_0\d+|フェラカットイン\(美雪\)_\d|Blow cut-in \(Miyuki\)_\d|^P_/,
         manual: null,
       },
       eventsProcessor: null,
