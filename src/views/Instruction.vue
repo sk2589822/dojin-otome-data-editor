@@ -91,7 +91,7 @@
       <br>
       可以在filter欄位輸入文字，下方會出現選單讓你選擇想要替換的圖片
       <br>
-      因為有些圖案只是日文/英文版的順序顛倒了，為了方便，也可以直接用拖曳拖曳original image或new image的圖至欲替換項目的new image欄位來取代或交換
+      因為有些圖案只是日文/英文版的順序顛倒了，所以也可以直接拖曳original image或new image的圖至欲替換項目的new image欄位來取代或交換(拖曳original image的話是取代，反之則是交換)
       <br>
       調整完之後按「產生檔案」，確定遊戲<b>目前是日文版且有安裝好patch</b>後，再把下載下來的檔案覆蓋到www/data即可。
     </p>
