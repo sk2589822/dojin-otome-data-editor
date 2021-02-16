@@ -46,10 +46,6 @@ body,
   height: 100%;
 }
 
-#app {
-  overflow: scroll;
-}
-
 body {
   position: relative;
   background-color: #f3f6f9 !important;
